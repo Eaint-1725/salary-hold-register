@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salary Hold Register — MyWorld Careers</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .tab-btn { border-bottom: 3px solid transparent; transition: border-color 0.2s, color 0.2s; }
+    .tab-btn.active { border-bottom-color: #1d4ed8; color: #1d4ed8; font-weight: 600; }
+    .spinner {
+      border: 3px solid #e5e7eb;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      width: 18px; height: 18px;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast-enter { animation: slideUp 0.3s ease forwards; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .alert-pulse { animation: alertPulse 2s ease-in-out 1; }
+    @keyframes alertPulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} 50%{box-shadow:0 0 0 8px rgba(239,68,68,0.25)} }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- ═══════════════════ HEADER ═══════════════════ -->
+  <header class="bg-blue-800 text-white shadow-lg">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+      <div>
+        <h1 class="text-xl font-bold leading-snug">Salary Hold Register</h1>
+        <p class="text-blue-300 text-xs tracking-wide">MyWorld Careers · Operations &amp; Finance</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ TABS ═══════════════════ -->
+  <div class="max-w-5xl mx-auto px-4 mt-5">
+    <div class="bg-white rounded-t-xl shadow-sm border border-gray-200 flex overflow-x-auto">
+      <button id="tab-btn-ops"
+        onclick="switchTab('ops')"
+        class="tab-btn active px-6 py-3.5 text-sm text-gray-500 hover:text-blue-700 whitespace-nowrap">
+        🏢 Operations
+      </button>
+      <button id="tab-btn-finance"
+        onclick="switchTab('finance')"
+        class="tab-btn px-6 py-3.5 text-sm text-gray-500 hover:text-blue-700 whitespace-nowrap">
+        💰 Finance
+      </button>
+      <button id="tab-btn-log"
+        onclick="switchTab('log')"
+        class="tab-btn px-6 py-3.5 text-sm text-gray-500 hover:text-blue-700 whitespace-nowrap">
+        📋 Acknowledgement Log
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         TAB 1 — OPERATIONS
+    ══════════════════════════════════════════════════════ -->
+    <div id="tab-ops" class="tab-panel bg-white border border-t-0 border-gray-200 rounded-b-xl shadow-sm p-6 md:p-8">
+
+      <h2 class="text-base font-semibold text-gray-800 mb-1">Register a Salary Hold</h2>
+      <p class="text-sm text-gray-500 mb-5">Record a hold instruction received from a client.</p>
+
+      <form id="hold-form" onsubmit="handleRegisterHold(event)" autocomplete="off"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Client Name *</label>
+          <input id="f-client" type="text" required placeholder="e.g. Acme Corporation"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Payroll Month *</label>
+          <input id="f-month" type="text" required placeholder="e.g. June 2026"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Employee ID *</label>
+          <input id="f-empid" type="text" required placeholder="e.g. EMP-0042"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Employee Name *</label>
+          <input id="f-empname" type="text" required placeholder="e.g. Aung Kyaw Zin"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Reason for Hold *</label>
+          <textarea id="f-reason" required rows="3"
+            placeholder="Describe why this employee's salary is being held…"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Registered By *</label>
+          <input id="f-regby" type="text" required placeholder="Your full name"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+
+        <div class="md:col-span-2 flex justify-end pt-1">
+          <button type="submit" id="submit-btn"
+            class="bg-blue-700 hover:bg-blue-800 active:bg-blue-900 text-white px-6 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm">
+            <span id="submit-text">Register Hold</span>
+            <span id="submit-spinner" class="hidden spinner" style="border-top-color:white"></span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Active Holds List -->
+      <div class="border-t border-gray-100 pt-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-base font-semibold text-gray-800">Active Holds</h2>
+            <p class="text-xs text-gray-400">All unresolved holds across all clients — auto-resolved when Finance acknowledges</p>
+          </div>
+          <button onclick="loadActiveHolds()"
+            class="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 hover:border-blue-400 px-3 py-1.5 rounded-md transition-colors">
+            ↻ Refresh
+          </button>
+        </div>
+        <div id="active-holds-container">
+          <div class="text-center text-gray-400 py-10 text-sm flex items-center justify-center gap-2">
+            <span class="spinner"></span> Loading holds…
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         TAB 2 — FINANCE
+    ══════════════════════════════════════════════════════ -->
+    <div id="tab-finance"
+      class="tab-panel hidden bg-white border border-t-0 border-gray-200 rounded-b-xl shadow-sm p-6 md:p-8">
+
+      <h2 class="text-base font-semibold text-gray-800 mb-1">Finance Clearance Check</h2>
+      <p class="text-sm text-gray-500 mb-5">
+        Select a client before processing any salary transfer. You must acknowledge any holds before proceeding.
+      </p>
+
+      <!-- Client selector -->
+      <div class="flex items-end gap-3 mb-6">
+        <div class="flex-1">
+          <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Select Client *</label>
+          <select id="finance-client" onchange="checkClientHolds()"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+            <option value="">— Select a client —</option>
+          </select>
+        </div>
+        <button onclick="loadFinanceClients()"
+          title="Reload client list"
+          class="border border-gray-300 text-gray-500 hover:bg-gray-50 px-3 py-2.5 rounded-lg text-sm transition-colors">
+          ↻
+        </button>
+      </div>
+
+      <!-- Loading state -->
+      <div id="finance-loading" class="hidden text-center py-10 text-gray-400 text-sm flex items-center justify-center gap-2">
+        <span class="spinner"></span> Checking for holds…
+      </div>
+
+      <!-- ⚠ HOLDS ALERT -->
+      <div id="finance-alert" class="hidden">
+        <div class="bg-red-50 border-2 border-red-500 rounded-xl p-5 mb-5 alert-pulse">
+          <div class="flex items-center gap-2 mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 flex-shrink-0" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h3 class="text-red-800 font-bold text-lg">⚠ SALARY HOLD ALERT — DO NOT TRANSFER</h3>
+          </div>
+          <p class="text-red-700 text-sm mb-4 font-medium">
+            The following employees have <strong>active salary holds</strong>. You must exclude them from this transfer.
+          </p>
+          <div id="finance-holds-list" class="space-y-3 mb-2"></div>
+        </div>
+
+        <!-- Acknowledgement section -->
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+          <h3 class="text-sm font-semibold text-gray-700 mb-3">Finance Acknowledgement Required</h3>
+
+          <label class="flex items-start gap-3 cursor-pointer mb-4 group">
+            <input type="checkbox" id="finance-checkbox" onchange="toggleProceedBtn()"
+              class="mt-0.5 h-4 w-4 rounded border-gray-400 text-blue-600 cursor-pointer" />
+            <span class="text-sm text-gray-700 group-hover:text-gray-900 leading-relaxed">
+              I have noted the above salary holds and will <strong>exclude these employees</strong>
+              from this transfer.
+            </span>
+          </label>
+
+          <div class="mb-4">
+            <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Your Name *</label>
+            <input id="finance-ackby" type="text" placeholder="Enter your full name"
+              class="w-full max-w-sm border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+          </div>
+
+          <button id="proceed-btn" disabled onclick="handleAcknowledge()"
+            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold
+                   bg-gray-200 text-gray-400 cursor-not-allowed transition-all shadow-sm">
+            <span id="proceed-text">Proceed with Transfer</span>
+            <span id="proceed-spinner" class="hidden spinner" style="border-top-color:white"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ✓ ALL CLEAR -->
+      <div id="finance-clear" class="hidden">
+        <div class="bg-green-50 border-2 border-green-500 rounded-xl p-5 flex items-center gap-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-500 flex-shrink-0" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p class="text-green-800 font-bold text-base">✓ All Clear — No Active Holds</p>
+            <p class="text-green-700 text-sm mt-0.5">
+              There are no salary holds for this client. You may proceed with the transfer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         TAB 3 — LOG
+    ══════════════════════════════════════════════════════ -->
+    <div id="tab-log"
+      class="tab-panel hidden bg-white border border-t-0 border-gray-200 rounded-b-xl shadow-sm p-6 md:p-8">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-base font-semibold text-gray-800">Acknowledgement Log</h2>
+          <p class="text-xs text-gray-400">Every Finance acknowledgement, newest first</p>
+        </div>
+        <button onclick="loadAckLog()"
+          class="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 hover:border-blue-400 px-3 py-1.5 rounded-md transition-colors">
+          ↻ Refresh
+        </button>
+      </div>
+      <div id="ack-log-container">
+        <div class="text-center text-gray-400 py-10 text-sm flex items-center justify-center gap-2">
+          <span class="spinner"></span> Loading log…
+        </div>
+      </div>
+    </div>
+  </div><!-- /max-w-5xl -->
+
+  <!-- ═══════════════════ TOAST ═══════════════════ -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden toast-enter">
+    <div id="toast-inner"
+      class="flex items-center gap-2 px-5 py-3 rounded-xl shadow-xl text-sm text-white font-medium max-w-sm">
+      <span id="toast-icon" class="text-base flex-shrink-0"></span>
+      <span id="toast-msg"></span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SCRIPT ═══════════════════ -->
+  <script>
+    // ────────────────────────────────────────────────────────────────────────────
+    // CONFIGURATION — update SITE_URL before deploying
+    // ────────────────────────────────────────────────────────────────────────────
+    const SITE_URL  = 'https://payrollandoutsourcing.sharepoint.com/sites/SalaryHoldRegister';
+    const HOLDS_LIST = 'SalaryHolds';
+    const ACK_LIST   = 'AckLog';
+
+    // IDs of the currently displayed unresolved holds for the selected Finance client.
+    // Populated by checkClientHolds(); consumed by handleAcknowledge() to auto-resolve.
+    let activeHoldIds = [];
+
+    // ─── SharePoint API helpers ──────────────────────────────────────────────────
+
+    /** Fetch a fresh request digest from SharePoint _api/contextinfo */
+    async function getDigest() {
+      const r = await fetch(`${SITE_URL}/_api/contextinfo`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json;odata=verbose' },
+        credentials: 'include'
+      });
+      if (!r.ok) throw new Error(`Could not get request digest (HTTP ${r.status}). Check SITE_URL and ensure you are logged in.`);
+      const d = await r.json();
+      return d.d.GetContextWebInformation.FormDigestValue;
+    }
+
+    /**
+     * GET items from a SharePoint list.
+     * @param {string} list  - list title
+     * @param {string} filter - OData $filter string (optional)
+     * @param {string} select - OData $select string (optional)
+     * @param {string} orderby - OData $orderby string (optional)
+     */
+    async function spGet(list, filter = '', select = '', orderby = '') {
+      let url = `${SITE_URL}/_api/web/lists/getbytitle('${encodeURIComponent(list)}')/items?$top=1000`;
+      if (filter)  url += `&$filter=${encodeURIComponent(filter)}`;
+      if (select)  url += `&$select=${encodeURIComponent(select)}`;
+      if (orderby) url += `&$orderby=${encodeURIComponent(orderby)}`;
+      const r = await fetch(url, {
+        headers: { 'Accept': 'application/json;odata=verbose' },
+        credentials: 'include'
+      });
+      if (!r.ok) {
+        const txt = await r.text().catch(() => '');
+        throw new Error(`GET ${list} failed (HTTP ${r.status}): ${txt.slice(0, 200)}`);
+      }
+      const d = await r.json();
+      return d.d.results;
+    }
+
+    /**
+     * POST a new item to a SharePoint list.
+     * The __metadata type is derived from the list name automatically.
+     */
+    async function spPost(list, body) {
+      const digest = await getDigest();
+      // SP list item entity type: spaces stripped, each word capitalised, then "ListItem"
+      const entityType = listEntityType(list);
+      const payload = Object.assign({ '__metadata': { 'type': entityType } }, body);
+      const r = await fetch(
+        `${SITE_URL}/_api/web/lists/getbytitle('${encodeURIComponent(list)}')/items`,
+        {
+          method: 'POST',
+          headers: {
+            'Accept':        'application/json;odata=verbose',
+            'Content-Type':  'application/json;odata=verbose',
+            'X-RequestDigest': digest
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        }
+      );
+      if (!r.ok) {
+        const txt = await r.text().catch(() => '');
+        throw new Error(`POST to ${list} failed (HTTP ${r.status}): ${txt.slice(0, 300)}`);
+      }
+      return await r.json();
+    }
+
+    /**
+     * PATCH (update) an existing list item.
+     */
+    async function spPatch(list, id, body) {
+      const digest = await getDigest();
+      const entityType = listEntityType(list);
+      const payload = Object.assign({ '__metadata': { 'type': entityType } }, body);
+      const r = await fetch(
+        `${SITE_URL}/_api/web/lists/getbytitle('${encodeURIComponent(list)}')/items(${id})`,
+        {
+          method: 'POST',
+          headers: {
+            'Accept':          'application/json;odata=verbose',
+            'Content-Type':    'application/json;odata=verbose',
+            'X-RequestDigest': digest,
+            'X-HTTP-Method':   'MERGE',
+            'IF-MATCH':        '*'
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        }
+      );
+      if (!r.ok) {
+        const txt = await r.text().catch(() => '');
+        throw new Error(`PATCH item ${id} in ${list} failed (HTTP ${r.status}): ${txt.slice(0, 300)}`);
+      }
+      return true;
+    }
+
+    /** Derive the SP list item entity type name from the list title. */
+    function listEntityType(listTitle) {
+      // Remove non-alphanumeric chars and build PascalCase, then append "ListItem"
+      const clean = listTitle.replace(/[^a-zA-Z0-9]/g, '_');
+      return `SP.Data.${clean}ListItem`;
+    }
+
+    // ─── Utility helpers ─────────────────────────────────────────────────────────
+
+    function escHtml(str) {
+      return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+             + ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+      } catch { return iso; }
+    }
+
+    let toastTimer;
+    function showToast(msg, type = 'success') {
+      clearTimeout(toastTimer);
+      const toast = document.getElementById('toast');
+      const inner = document.getElementById('toast-inner');
+      const icon  = document.getElementById('toast-icon');
+      const text  = document.getElementById('toast-msg');
+
+      const cfg = {
+        success: { bg: 'bg-green-600', icon: '✓' },
+        error:   { bg: 'bg-red-600',   icon: '✕' },
+        info:    { bg: 'bg-blue-600',  icon: 'ℹ' }
+      }[type] || { bg: 'bg-gray-700', icon: '•' };
+
+      icon.textContent = cfg.icon;
+      text.textContent = msg;
+      inner.className  = `flex items-center gap-2 px-5 py-3 rounded-xl shadow-xl text-sm text-white font-medium max-w-sm ${cfg.bg}`;
+      toast.classList.remove('hidden');
+      toast.classList.add('toast-enter');
+      toastTimer = setTimeout(() => toast.classList.add('hidden'), 4500);
+    }
+
+    // ─── Tab switching ────────────────────────────────────────────────────────────
+
+    function switchTab(tab) {
+      ['ops', 'finance', 'log'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        document.getElementById(`tab-btn-${t}`).classList.remove('active');
+      });
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      document.getElementById(`tab-btn-${tab}`).classList.add('active');
+
+      if (tab === 'ops')     loadActiveHolds();
+      if (tab === 'finance') loadFinanceClients();
+      if (tab === 'log')     loadAckLog();
+    }
+
+    // ─── Tab 1 — Operations ───────────────────────────────────────────────────────
+
+    async function handleRegisterHold(e) {
+      e.preventDefault();
+      setSubmitState(true);
+      try {
+        await spPost(HOLDS_LIST, {
+          Title:          val('f-client'),
+          EmployeeID:     val('f-empid'),
+          EmployeeName:   val('f-empname'),
+          PayrollMonth:   val('f-month'),
+          Reason:         val('f-reason'),
+          Resolved:       false,
+          RegisteredBy:   val('f-regby'),
+          RegisteredDate: new Date().toISOString()
+        });
+        showToast('Hold registered successfully.', 'success');
+        document.getElementById('hold-form').reset();
+        await loadActiveHolds();
+      } catch (err) {
+        showToast(`Error: ${err.message}`, 'error');
+        console.error('[RegisterHold]', err);
+      } finally {
+        setSubmitState(false);
+      }
+    }
+
+    function setSubmitState(loading) {
+      const btn  = document.getElementById('submit-btn');
+      const spin = document.getElementById('submit-spinner');
+      const txt  = document.getElementById('submit-text');
+      btn.disabled      = loading;
+      spin.classList.toggle('hidden', !loading);
+      txt.textContent   = loading ? 'Saving…' : 'Register Hold';
+    }
+
+    async function loadActiveHolds() {
+      const c = document.getElementById('active-holds-container');
+      c.innerHTML = loadingHtml();
+      try {
+        const items = await spGet(
+          HOLDS_LIST,
+          'Resolved eq false',
+          'Id,Title,EmployeeID,EmployeeName,PayrollMonth,Reason,RegisteredBy,RegisteredDate',
+          'RegisteredDate desc'
+        );
+
+        if (items.length === 0) {
+          c.innerHTML = emptyHtml('No active holds. All salaries are clear to process. 🎉');
+          return;
+        }
+
+        // Group by client (Title)
+        const byClient = {};
+        items.forEach(i => {
+          const key = i.Title || '(No client)';
+          if (!byClient[key]) byClient[key] = [];
+          byClient[key].push(i);
+        });
+
+        let html = `<p class="text-xs text-gray-400 mb-4">${items.length} active hold${items.length !== 1 ? 's' : ''} across ${Object.keys(byClient).length} client${Object.keys(byClient).length !== 1 ? 's' : ''}</p>`;
+
+        for (const [client, holds] of Object.entries(byClient).sort()) {
+          html += `
+            <div class="mb-6">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">${escHtml(client)}</span>
+                <span class="bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full font-semibold">${holds.length} hold${holds.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div class="space-y-3">`;
+
+          holds.forEach(h => {
+            html += `
+              <div class="border border-orange-200 bg-orange-50 rounded-xl p-4">
+                <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+                  <span class="font-semibold text-gray-900 text-sm">${escHtml(h.EmployeeName)}</span>
+                  <span class="bg-orange-200 text-orange-800 text-xs px-2 py-0.5 rounded-full">${escHtml(h.EmployeeID)}</span>
+                  <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">${escHtml(h.PayrollMonth)}</span>
+                </div>
+                <p class="text-sm text-gray-700 mb-2 leading-relaxed">${escHtml(h.Reason)}</p>
+                <p class="text-xs text-gray-400">Registered by <strong>${escHtml(h.RegisteredBy)}</strong> · ${fmtDate(h.RegisteredDate)}</p>
+              </div>`;
+          });
+
+          html += `</div></div>`;
+        }
+
+        c.innerHTML = html;
+      } catch (err) {
+        c.innerHTML = errorHtml(err.message);
+        console.error('[LoadActiveHolds]', err);
+      }
+    }
+
+    // ─── Tab 2 — Finance ──────────────────────────────────────────────────────────
+
+    async function loadFinanceClients() {
+      const sel = document.getElementById('finance-client');
+      const cur = sel.value;
+      try {
+        const items  = await spGet(HOLDS_LIST, '', 'Title');
+        const unique = [...new Set(items.map(i => i.Title).filter(Boolean))].sort();
+        sel.innerHTML = '<option value="">— Select a client —</option>';
+        unique.forEach(c => {
+          const o      = document.createElement('option');
+          o.value      = c;
+          o.textContent = c;
+          if (c === cur) o.selected = true;
+          sel.appendChild(o);
+        });
+      } catch (err) {
+        showToast(`Could not load client list: ${err.message}`, 'error');
+        console.error('[LoadFinanceClients]', err);
+      }
+    }
+
+    async function checkClientHolds() {
+      const client = document.getElementById('finance-client').value;
+
+      // Reset state
+      hide('finance-alert'); hide('finance-clear'); hide('finance-loading');
+      document.getElementById('finance-checkbox').checked = false;
+      document.getElementById('finance-ackby').value = '';
+      activeHoldIds = [];
+      resetProceedBtn();
+
+      if (!client) return;
+
+      show('finance-loading');
+      try {
+        // Escape single quotes in the client name for OData filter
+        const escaped = client.replace(/'/g, "''");
+        const items = await spGet(
+          HOLDS_LIST,
+          `Title eq '${escaped}' and Resolved eq false`,
+          'Id,Title,EmployeeID,EmployeeName,Reason,PayrollMonth'
+        );
+        hide('finance-loading');
+        // Store IDs so handleAcknowledge() can auto-resolve them
+        activeHoldIds = items.map(i => i.Id);
+
+        if (items.length > 0) {
+          // Build hold cards
+          document.getElementById('finance-holds-list').innerHTML = items.map(h => `
+            <div class="bg-white border border-red-300 rounded-lg p-3.5" data-name="${escHtml(h.EmployeeName)}">
+              <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
+                <span class="font-bold text-red-900 text-sm">${escHtml(h.EmployeeName)}</span>
+                <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">${escHtml(h.EmployeeID)}</span>
+                <span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">${escHtml(h.PayrollMonth)}</span>
+              </div>
+              <p class="text-sm text-red-800"><span class="font-semibold">Reason:</span> ${escHtml(h.Reason)}</p>
+            </div>
+          `).join('');
+          show('finance-alert');
+          // Re-trigger pulse animation
+          const alertEl = document.getElementById('finance-alert').querySelector('.alert-pulse');
+          if (alertEl) { alertEl.classList.remove('alert-pulse'); void alertEl.offsetWidth; alertEl.classList.add('alert-pulse'); }
+        } else {
+          show('finance-clear');
+        }
+      } catch (err) {
+        hide('finance-loading');
+        showToast(`Error checking holds: ${err.message}`, 'error');
+        console.error('[CheckClientHolds]', err);
+      }
+    }
+
+    function toggleProceedBtn() {
+      const checked = document.getElementById('finance-checkbox').checked;
+      const btn     = document.getElementById('proceed-btn');
+      if (checked) {
+        btn.disabled  = false;
+        btn.className = 'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold bg-blue-700 hover:bg-blue-800 active:bg-blue-900 text-white cursor-pointer transition-all shadow-sm';
+      } else {
+        resetProceedBtn();
+      }
+    }
+
+    function resetProceedBtn() {
+      const btn    = document.getElementById('proceed-btn');
+      btn.disabled = true;
+      btn.className = 'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold bg-gray-200 text-gray-400 cursor-not-allowed transition-all shadow-sm';
+    }
+
+    async function handleAcknowledge() {
+      const ackBy = document.getElementById('finance-ackby').value.trim();
+      if (!ackBy) { showToast('Please enter your name before proceeding.', 'error'); return; }
+
+      const client = document.getElementById('finance-client').value;
+      // Collect employee names from the hold cards
+      const names = [...document.querySelectorAll('#finance-holds-list [data-name]')]
+        .map(el => el.getAttribute('data-name')).filter(Boolean);
+
+      const btn  = document.getElementById('proceed-btn');
+      const spin = document.getElementById('proceed-spinner');
+      const txt  = document.getElementById('proceed-text');
+      btn.disabled    = true;
+      spin.classList.remove('hidden');
+      txt.textContent = 'Saving…';
+      btn.className   = 'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold bg-blue-500 text-white cursor-not-allowed transition-all shadow-sm';
+
+      try {
+        // 1. Log the acknowledgement to AckLog
+        await spPost(ACK_LIST, {
+          Title:            client,
+          HoldsNoted:       names.join(', '),
+          AcknowledgedBy:   ackBy,
+          AcknowledgedDate: new Date().toISOString()
+        });
+
+        // 2. Auto-resolve all active holds for this client in parallel
+        if (activeHoldIds.length > 0) {
+          txt.textContent = `Resolving ${activeHoldIds.length} hold${activeHoldIds.length !== 1 ? 's' : ''}…`;
+          await Promise.all(activeHoldIds.map(id => spPatch(HOLDS_LIST, id, { Resolved: true })));
+        }
+
+        showToast(
+          `Acknowledged & ${activeHoldIds.length} hold${activeHoldIds.length !== 1 ? 's' : ''} auto-resolved. Transfer may proceed.`,
+          'success'
+        );
+        activeHoldIds = [];
+
+        // Reset Finance tab to clean state
+        hide('finance-alert');
+        show('finance-clear');
+        document.getElementById('finance-client').value = '';
+        document.getElementById('finance-ackby').value  = '';
+        document.getElementById('finance-checkbox').checked = false;
+      } catch (err) {
+        showToast(`Error: ${err.message}`, 'error');
+        console.error('[HandleAcknowledge]', err);
+        // Restore button
+        spin.classList.add('hidden');
+        txt.textContent = 'Proceed with Transfer';
+        btn.disabled    = false;
+        btn.className   = 'inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white cursor-pointer transition-all shadow-sm';
+      }
+    }
+
+    // ─── Tab 3 — Acknowledgement Log ─────────────────────────────────────────────
+
+    async function loadAckLog() {
+      const c = document.getElementById('ack-log-container');
+      c.innerHTML = loadingHtml();
+      try {
+        const items = await spGet(
+          ACK_LIST, '', 'Id,Title,HoldsNoted,AcknowledgedBy,AcknowledgedDate', 'AcknowledgedDate desc'
+        );
+
+        if (items.length === 0) {
+          c.innerHTML = emptyHtml('No acknowledgements logged yet.');
+          return;
+        }
+
+        const rows = items.map(i => `
+          <div class="border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-xl p-4 mb-3 transition-colors">
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <span class="font-semibold text-gray-900 text-sm">${escHtml(i.Title)}</span>
+              <span class="text-xs text-gray-400 whitespace-nowrap">${fmtDate(i.AcknowledgedDate)}</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">
+              <span class="font-medium text-gray-700">Employees noted:</span>
+              ${escHtml(i.HoldsNoted || '—')}
+            </p>
+            <p class="text-xs text-gray-400">
+              <span class="font-medium text-gray-500">Acknowledged by:</span> ${escHtml(i.AcknowledgedBy)}
+            </p>
+          </div>
+        `).join('');
+
+        c.innerHTML = `<p class="text-xs text-gray-400 mb-4">${items.length} record${items.length !== 1 ? 's' : ''} total</p>` + rows;
+      } catch (err) {
+        c.innerHTML = errorHtml(err.message);
+        console.error('[LoadAckLog]', err);
+      }
+    }
+
+    // ─── Mini template helpers ────────────────────────────────────────────────────
+
+    function loadingHtml() {
+      return `<div class="flex items-center justify-center gap-2 text-gray-400 text-sm py-10"><span class="spinner"></span> Loading…</div>`;
+    }
+
+    function emptyHtml(msg) {
+      return `<div class="text-center text-gray-400 text-sm py-10">${escHtml(msg)}</div>`;
+    }
+
+    function errorHtml(msg) {
+      return `<div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+        <strong>Error:</strong> ${escHtml(msg)}<br>
+        <span class="text-xs text-red-500 mt-1 block">Check the browser console for details. Ensure SITE_URL is correct and you are signed into SharePoint.</span>
+      </div>`;
+    }
+
+    function val(id) { return document.getElementById(id).value.trim(); }
+    function show(id) { document.getElementById(id).classList.remove('hidden'); }
+    function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────────
+    loadActiveHolds();
+  </script>
+</body>
+</html>
